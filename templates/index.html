@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Task Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .add-task-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .add-task-form input[type="text"] {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .add-task-form input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        .task-list {
+            list-style: none;
+        }
+        
+        .task-item {
+            background: #f8f9fa;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s;
+        }
+        
+        .task-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .task-item.completed {
+            background: #e8f5e9;
+            opacity: 0.7;
+        }
+        
+        .task-item.completed .task-text {
+            text-decoration: line-through;
+            color: #888;
+        }
+        
+        .task-text {
+            flex: 1;
+            font-size: 18px;
+            color: #333;
+        }
+        
+        .task-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-complete {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .btn-complete:hover {
+            background: #45a049;
+        }
+        
+        .btn-uncomplete {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .btn-uncomplete:hover {
+            background: #e68900;
+        }
+        
+        .btn-delete {
+            background: #f44336;
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background: #da190b;
+        }
+        
+        .btn-edit {
+            background: #2196f3;
+            color: white;
+        }
+        
+        .btn-edit:hover {
+            background: #0b7dda;
+        }
+        
+        .no-tasks {
+            text-align: center;
+            color: #999;
+            font-size: 18px;
+            padding: 40px;
+        }
+        
+        .edit-form {
+            display: none;
+            flex: 1;
+            gap: 10px;
+        }
+        
+        .edit-form input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 Daily Task Tracker</h1>
+        
+        <!-- Stats Section -->
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number">{{ tasks|length }}</div>
+                <div class="stat-label">Total Tasks</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">{{ tasks|selectattr('3', 'equalto', 1)|list|length }}</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">{{ tasks|selectattr('3', 'equalto', 0)|list|length }}</div>
+                <div class="stat-label">Pending</div>
+            </div>
+        </div>
+        
+        <!-- Add Task Form -->
+        <form action="/add" method="POST" class="add-task-form">
+            <input type="text" name="task" placeholder="Enter a new task..." required>
+            <button type="submit" class="btn btn-primary">Add Task</button>
+        </form>
+        
+        <!-- Task List -->
+        {% if tasks %}
+        <ul class="task-list">
+            {% for task in tasks %}
+            <li class="task-item {% if task[2] == 1 %}completed{% endif %}" id="task-{{ task[0] }}">
+                <span class="task-text" id="text-{{ task[0] }}">{{ task[1] }}</span>
+                
+                <form action="/edit/{{ task[0] }}" method="POST" class="edit-form" id="edit-form-{{ task[0] }}">
+                    <input type="text" name="task" value="{{ task[1] }}" required>
+                    <button type="submit" class="btn-small btn-complete">Save</button>
+                    <button type="button" class="btn-small btn-delete" onclick="cancelEdit({{ task[0] }})">Cancel</button>
+                </form>
+                
+                <div class="task-actions" id="actions-{{ task[0] }}">
+                    {% if task[2] == 0 %}
+                    <a href="/complete/{{ task[0] }}">
+                        <button class="btn-small btn-complete">✓ Complete</button>
+                    </a>
+                    {% else %}
+                    <a href="/uncomplete/{{ task[0] }}">
+                        <button class="btn-small btn-uncomplete">↺ Undo</button>
+                    </a>
+                    {% endif %}
+                    
+                    <button class="btn-small btn-edit" onclick="editTask({{ task[0] }})">✎ Edit</button>
+                    
+                    <a href="/delete/{{ task[0] }}">
+                        <button class="btn-small btn-delete">✕ Delete</button>
+                    </a>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="no-tasks">
+            <p>🎉 No tasks yet! Add your first task above.</p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <script>
+        function editTask(taskId) {
+            document.getElementById('text-' + taskId).style.display = 'none';
+            document.getElementById('actions-' + taskId).style.display = 'none';
+            document.getElementById('edit-form-' + taskId).style.display = 'flex';
+        }
+        
+        function cancelEdit(taskId) {
+            document.getElementById('text-' + taskId).style.display = 'block';
+            document.getElementById('actions-' + taskId).style.display = 'flex';
+            document.getElementById('edit-form-' + taskId).style.display = 'none';
+        }
+    </script>
+</body>
+</html>
