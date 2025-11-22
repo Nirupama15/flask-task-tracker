@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - TaskFlow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .navbar {
+            background: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .navbar-user {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .username {
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .btn-logout {
+            padding: 8px 20px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-logout:hover {
+            background: #da190b;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 1em;
+            opacity: 0.9;
+        }
+        
+        .today-section {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 5px solid #ffc107;
+        }
+        
+        .today-section h3 {
+            color: #856404;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .add-task-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .add-task-form input[type="text"] {
+            flex: 1;
+            min-width: 250px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .add-task-form input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .add-task-form select {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        .task-list {
+            list-style: none;
+        }
+        
+        .task-item {
+            background: #f8f9fa;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s;
+            border-left: 4px solid #667eea;
+        }
+        
+        .task-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .task-item.completed {
+            background: #e8f5e9;
+            opacity: 0.7;
+            border-left-color: #4caf50;
+        }
+        
+        .task-item.completed .task-text {
+            text-decoration: line-through;
+            color: #888;
+        }
+        
+        .task-item.priority-high {
+            border-left-color: #f44336;
+        }
+        
+        .task-item.priority-low {
+            border-left-color: #2196f3;
+        }
+        
+        .priority-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .priority-high {
+            background: #ffebee;
+            color: #f44336;
+        }
+        
+        .priority-medium {
+            background: #fff3e0;
+            color: #ff9800;
+        }
+        
+        .priority-low {
+            background: #e3f2fd;
+            color: #2196f3;
+        }
+        
+        .task-text {
+            flex: 1;
+            font-size: 18px;
+            color: #333;
+        }
+        
+        .task-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-complete {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .btn-complete:hover {
+            background: #45a049;
+        }
+        
+        .btn-uncomplete {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .btn-uncomplete:hover {
+            background: #e68900;
+        }
+        
+        .btn-delete {
+            background: #f44336;
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background: #da190b;
+        }
+        
+        .btn-edit {
+            background: #2196f3;
+            color: white;
+        }
+        
+        .btn-edit:hover {
+            background: #0b7dda;
+        }
+        
+        .no-tasks {
+            text-align: center;
+            color: #999;
+            font-size: 18px;
+            padding: 40px;
+        }
+        
+        .edit-form {
+            display: none;
+            flex: 1;
+            gap: 10px;
+        }
+        
+        .edit-form input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .alert-error {
+            background: #fee;
+            color: #c33;
+            border: 1px solid #fcc;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .section-title {
+            color: #667eea;
+            margin: 30px 0 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .add-task-form {
+                flex-direction: column;
+            }
+            
+            .task-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-brand">📝 TaskFlow</div>
+        <div class="navbar-user">
+            <span class="username">👋 {{ user.username }}</span>
+            <a href="/logout" class="btn-logout">Logout</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h1>My Dashboard</h1>
+        
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ total }}</div>
+                <div class="stat-label">Total Tasks</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ completed }}</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ pending }}</div>
+                <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ today_total }}</div>
+                <div class="stat-label">Today's Tasks</div>
+            </div>
+        </div>
+        
+        {% if today_tasks %}
+        <div class="today-section">
+            <h3>🌅 Today's Tasks ({{ today_completed }}/{{ today_total }} completed)</h3>
+            <ul class="task-list">
+                {% for task in today_tasks %}
+                <li class="task-item {% if task[3] == 1 %}completed{% endif %} priority-{{ task[4] }}" id="today-task-{{ task[0] }}">
+                    <span class="priority-badge priority-{{ task[4] }}">{{ task[4]|upper }}</span>
+                    <span class="task-text" id="today-text-{{ task[0] }}">{{ task[2] }}</span>
+                    <div class="task-actions" id="today-actions-{{ task[0] }}">
+                        {% if task[3] == 0 %}
+                        <a href="/complete/{{ task[0] }}" class="btn-small btn-complete">✓ Complete</a>
+                        {% else %}
+                        <a href="/uncomplete/{{ task[0] }}" class="btn-small btn-uncomplete">↺ Undo</a>
+                        {% endif %}
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        
+        <form action="/add" method="POST" class="add-task-form">
+            <input type="text" name="task" placeholder="Enter a new task..." required>
+            <select name="priority">
+                <option value="low">Low Priority</option>
+                <option value="medium" selected>Medium Priority</option>
+                <option value="high">High Priority</option>
+            </select>
+            <button type="submit" class="btn btn-primary">Add Task</button>
+        </form>
+        
+        <h2 class="section-title">All Tasks</h2>
+        
+        {% if tasks %}
+        <ul class="task-list">
+            {% for task in tasks %}
+            <li class="task-item {% if task[3] == 1 %}completed{% endif %} priority-{{ task[4] }}" id="task-{{ task[0] }}">
+                <span class="priority-badge priority-{{ task[4] }}">{{ task[4]|upper }}</span>
+                <span class="task-text" id="text-{{ task[0] }}">{{ task[2] }}</span>
+                
+                <form action="/edit/{{ task[0] }}" method="POST" class="edit-form" id="edit-form-{{ task[0] }}">
+                    <input type="text" name="task" value="{{ task[2] }}" required>
+                    <select name="priority">
+                        <option value="low" {% if task[4] == 'low' %}selected{% endif %}>Low</option>
+                        <option value="medium" {% if task[4] == 'medium' %}selected{% endif %}>Medium</option>
+                        <option value="high" {% if task[4] == 'high' %}selected{% endif %}>High</option>
+                    </select>
+                    <button type="submit" class="btn-small btn-complete">Save</button>
+                    <button type="button" class="btn-small btn-delete" onclick="cancelEdit({{ task[0] }})">Cancel</button>
+                </form>
+                
+                <div class="task-actions" id="actions-{{ task[0] }}">
+                    {% if task[3] == 0 %}
+                    <a href="/complete/{{ task[0] }}" class="btn-small btn-complete">✓ Complete</a>
+                    {% else %}
+                    <a href="/uncomplete/{{ task[0] }}" class="btn-small btn-uncomplete">↺ Undo</a>
+                    {% endif %}
+                    
+                    <button class="btn-small btn-edit" onclick="editTask({{ task[0] }})">✎ Edit</button>
+                    
+                    <a href="/delete/{{ task[0] }}" onclick="return confirm('Are you sure you want to delete this task?')">
+                        <button class="btn-small btn-delete">✕ Delete</button>
+                    </a>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="no-tasks">
+            <p>🎉 No tasks yet! Add your first task above.</p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <script>
+        function editTask(taskId) {
+            document.getElementById('text-' + taskId).style.display = 'none';
+            document.getElementById('actions-' + taskId).style.display = 'none';
+            document.getElementById('edit-form-' + taskId).style.display = 'flex';
+        }
+        
+        function cancelEdit(taskId) {
+            document.getElementById('text-' + taskId).style.display = 'block';
+            document.getElementById('actions-' + taskId).style.display = 'flex';
+            document.getElementById('edit-form-' + taskId).style.display = 'none';
+        }
+    </script>
+</body>
+</html>
