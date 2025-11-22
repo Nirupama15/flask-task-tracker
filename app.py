@@ -20,6 +20,10 @@ def init_db():
     conn.commit()
     conn.close()
 
+# Initialize database when app starts
+with app.app_context():
+    init_db()
+
 # Get all tasks
 def get_tasks():
     conn = sqlite3.connect(DB_PATH)
@@ -84,5 +88,4 @@ def edit_task(task_id):
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    init_db()
     app.run(debug=True, host='0.0.0.0')
