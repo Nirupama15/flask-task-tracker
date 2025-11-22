@@ -342,18 +342,150 @@
         }
         
         @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
             .navbar {
                 flex-direction: column;
                 gap: 15px;
+                padding: 15px;
+                text-align: center;
+            }
+            
+            .navbar-user {
+                flex-direction: column;
+                gap: 10px;
+                width: 100%;
+            }
+            
+            .btn-logout {
+                width: 100%;
+            }
+            
+            .container {
+                padding: 20px 15px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            
+            .stat-card {
+                padding: 20px 15px;
+            }
+            
+            .stat-number {
+                font-size: 2em;
             }
             
             .add-task-form {
                 flex-direction: column;
             }
             
+            .add-task-form input[type="text"] {
+                min-width: 100%;
+            }
+            
+            .add-task-form select {
+                width: 100%;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
             .task-item {
                 flex-direction: column;
                 align-items: flex-start;
+                padding: 15px;
+            }
+            
+            .task-text {
+                font-size: 16px;
+                margin-bottom: 10px;
+            }
+            
+            .task-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            
+            .btn-small {
+                flex: 1;
+                text-align: center;
+                padding: 10px 12px;
+            }
+            
+            .edit-form {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .edit-form input,
+            .edit-form select {
+                width: 100%;
+            }
+            
+            .section-title {
+                font-size: 1.3em;
+            }
+            
+            .today-section h3 {
+                font-size: 1.1em;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .stat-number {
+                font-size: 1.8em;
+            }
+            
+            .stat-label {
+                font-size: 0.9em;
+            }
+            
+            .task-item {
+                padding: 12px;
+            }
+            
+            .task-text {
+                font-size: 15px;
+                word-break: break-word;
+            }
+            
+            .task-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .btn-small {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+            
+            .priority-badge {
+                font-size: 11px;
+                padding: 3px 10px;
+            }
+            
+            .today-section {
+                padding: 15px;
             }
         }
     </style>

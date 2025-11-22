@@ -148,16 +148,57 @@
         }
         
         @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .hero {
+                padding: 40px 20px;
+            }
+            
             .hero h1 {
                 font-size: 2em;
             }
             
-            .cta-buttons {
-                flex-direction: column;
+            .hero p {
+                font-size: 1.1em;
             }
             
             .features {
                 grid-template-columns: 1fr;
+                padding: 30px 20px;
+            }
+            
+            .cta-section {
+                padding: 30px 20px;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .btn {
+                width: 100%;
+                padding: 15px 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 1.8em;
+            }
+            
+            .hero p {
+                font-size: 1em;
+            }
+            
+            .feature h3 {
+                font-size: 1.2em;
+            }
+            
+            .feature p {
+                font-size: 0.9em;
             }
         }
     </style>
