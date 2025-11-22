@@ -1,12 +1,16 @@
 from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
+import os
 from datetime import datetime
 
 app = Flask(__name__)
 
+# Use /tmp directory for database on Render (writable location)
+DB_PATH = os.path.join('/tmp', 'tasks.db') if os.environ.get('RENDER') else 'tasks.db'
+
 # Database setup
 def init_db():
-    conn = sqlite3.connect('tasks.db')
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS tasks
                  (id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -18,7 +22,7 @@ def init_db():
 
 # Get all tasks
 def get_tasks():
-    conn = sqlite3.connect('tasks.db')
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('SELECT * FROM tasks ORDER BY created_at DESC')
     tasks = c.fetchall()
@@ -34,7 +38,7 @@ def index():
 def add_task():
     task = request.form.get('task')
     if task:
-        conn = sqlite3.connect('tasks.db')
+        conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
         c.execute('INSERT INTO tasks (task) VALUES (?)', (task,))
         conn.commit()
@@ -43,7 +47,7 @@ def add_task():
 
 @app.route('/complete/<int:task_id>')
 def complete_task(task_id):
-    conn = sqlite3.connect('tasks.db')
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('UPDATE tasks SET completed = 1 WHERE id = ?', (task_id,))
     conn.commit()
@@ -52,7 +56,7 @@ def complete_task(task_id):
 
 @app.route('/uncomplete/<int:task_id>')
 def uncomplete_task(task_id):
-    conn = sqlite3.connect('tasks.db')
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('UPDATE tasks SET completed = 0 WHERE id = ?', (task_id,))
     conn.commit()
@@ -61,7 +65,7 @@ def uncomplete_task(task_id):
 
 @app.route('/delete/<int:task_id>')
 def delete_task(task_id):
-    conn = sqlite3.connect('tasks.db')
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('DELETE FROM tasks WHERE id = ?', (task_id,))
     conn.commit()
@@ -72,7 +76,7 @@ def delete_task(task_id):
 def edit_task(task_id):
     new_task = request.form.get('task')
     if new_task:
-        conn = sqlite3.connect('tasks.db')
+        conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
         c.execute('UPDATE tasks SET task = ? WHERE id = ?', (new_task, task_id))
         conn.commit()
