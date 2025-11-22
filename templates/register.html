@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - TaskFlow</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -13,7 +14,7 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -24,11 +25,12 @@
         .register-container {
             max-width: 450px;
             width: 100%;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            background: linear-gradient(135deg, #fffef7 0%, #f5f5dc 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
             padding: 40px;
-            animation: slideIn 0.5s;
+            border: 2px solid #d4af37;
+            animation: slideIn 0.5s ease;
         }
         
         @keyframes slideIn {
@@ -42,11 +44,34 @@
             }
         }
         
+        .icon-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .icon-header i {
+            font-size: 3em;
+            color: #d4af37;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
         h2 {
             text-align: center;
-            color: #667eea;
+            color: #2c2c2c;
+            margin-bottom: 8px;
+            font-size: 1.8em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
             margin-bottom: 30px;
-            font-size: 2em;
+            font-size: 0.95em;
         }
         
         .form-group {
@@ -56,58 +81,80 @@
         label {
             display: block;
             margin-bottom: 8px;
-            color: #333;
+            color: #2c2c2c;
             font-weight: 600;
+            font-size: 0.9em;
+        }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #d4af37;
+            font-size: 1em;
         }
         
         input {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
+            padding: 12px 12px 12px 40px;
+            border: 2px solid #d4af37;
+            border-radius: 12px;
+            font-size: 0.95em;
+            transition: all 0.3s;
+            background: white;
+            color: #2c2c2c;
         }
         
         input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #2c2c2c;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
         }
         
         .btn {
             width: 100%;
-            padding: 15px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
+            padding: 13px;
+            background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+            color: #d4af37;
+            border: 2px solid #d4af37;
+            border-radius: 12px;
+            font-size: 1em;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
             margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
         .btn:hover {
-            background: #5568d3;
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3);
         }
         
         .login-link {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 25px;
             color: #666;
+            font-size: 0.9em;
         }
         
         .login-link a {
-            color: #667eea;
+            color: #2c2c2c;
             text-decoration: none;
             font-weight: 600;
+            border-bottom: 2px solid #d4af37;
         }
         
         .login-link a:hover {
-            text-decoration: underline;
+            color: #d4af37;
         }
         
         .flash-messages {
@@ -116,20 +163,21 @@
         
         .alert {
             padding: 12px;
-            border-radius: 8px;
+            border-radius: 10px;
             margin-bottom: 10px;
+            font-size: 0.9em;
         }
         
         .alert-error {
-            background: #fee;
+            background: #ffe0e0;
             color: #c33;
-            border: 1px solid #fcc;
+            border-left: 4px solid #c33;
         }
         
         .alert-success {
-            background: #efe;
-            color: #3c3;
-            border: 1px solid #cfc;
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
         }
         
         .back-link {
@@ -138,71 +186,53 @@
         }
         
         .back-link a {
-            color: #667eea;
+            color: #d4af37;
             text-decoration: none;
-            font-size: 14px;
+            font-size: 0.9em;
+            font-weight: 600;
         }
         
         .back-link a:hover {
-            text-decoration: underline;
+            color: #2c2c2c;
+        }
+        
+        .back-link a i {
+            margin-right: 5px;
         }
         
         @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-            
-            .register-container {
-                padding: 30px 20px;
-            }
-            
-            h2 {
-                font-size: 1.8em;
-            }
-            
-            input {
-                font-size: 15px;
-                padding: 12px;
-            }
-            
-            .btn {
-                padding: 14px;
-                font-size: 16px;
-            }
+            body { padding: 15px; }
+            .register-container { padding: 30px 25px; }
+            h2 { font-size: 1.6em; }
         }
         
         @media (max-width: 480px) {
-            .register-container {
-                padding: 25px 15px;
-            }
-            
-            h2 {
-                font-size: 1.5em;
-            }
-            
-            input {
-                font-size: 14px;
-            }
-            
-            .btn {
-                font-size: 15px;
-            }
+            .register-container { padding: 25px 20px; }
+            h2 { font-size: 1.5em; }
+            .icon-header i { font-size: 2.5em; }
         }
     </style>
 </head>
 <body>
     <div class="register-container">
         <div class="back-link">
-            <a href="/">← Back to Home</a>
+            <a href="/"><i class="fas fa-arrow-left"></i> Back to Home</a>
         </div>
         
-        <h2>📝 Create Account</h2>
+        <div class="icon-header">
+            <i class="fas fa-user-plus"></i>
+        </div>
+        <h2>Create Account</h2>
+        <p class="subtitle">Join TaskFlow today!</p>
         
         <div class="flash-messages">
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
-                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                        <div class="alert alert-{{ category }}">
+                            <i class="fas fa-{% if category == 'error' %}exclamation-circle{% else %}check-circle{% endif %}"></i>
+                            {{ message }}
+                        </div>
                     {% endfor %}
                 {% endif %}
             {% endwith %}
@@ -211,29 +241,43 @@
         <form method="POST" action="/register">
             <div class="form-group">
                 <label for="username">Username</label>
-                <input type="text" id="username" name="username" required minlength="3">
+                <div class="input-wrapper">
+                    <i class="fas fa-user input-icon"></i>
+                    <input type="text" id="username" name="username" required minlength="3" placeholder="Choose username">
+                </div>
             </div>
             
             <div class="form-group">
                 <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" required>
+                <div class="input-wrapper">
+                    <i class="fas fa-envelope input-icon"></i>
+                    <input type="email" id="email" name="email" required placeholder="your@email.com">
+                </div>
             </div>
             
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" required minlength="6">
+                <div class="input-wrapper">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input type="password" id="password" name="password" required minlength="6" placeholder="Min. 6 characters">
+                </div>
             </div>
             
             <div class="form-group">
                 <label for="confirm_password">Confirm Password</label>
-                <input type="password" id="confirm_password" name="confirm_password" required>
+                <div class="input-wrapper">
+                    <i class="fas fa-check-circle input-icon"></i>
+                    <input type="password" id="confirm_password" name="confirm_password" required placeholder="Re-enter password">
+                </div>
             </div>
             
-            <button type="submit" class="btn">Create Account</button>
+            <button type="submit" class="btn">
+                <i class="fas fa-rocket"></i> Create Account
+            </button>
         </form>
         
         <div class="login-link">
-            Already have an account? <a href="/login">Sign in here</a>
+            Already have an account? <a href="/login">Sign in</a>
         </div>
     </div>
 </body>

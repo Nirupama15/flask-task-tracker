@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TaskFlow - Your Personal Task Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -13,7 +14,7 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -22,35 +23,48 @@
         }
         
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             width: 100%;
-            background: white;
+            background: linear-gradient(135deg, #fffef7 0%, #f5f5dc 100%);
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
             overflow: hidden;
+            border: 2px solid #d4af37;
         }
         
         .hero {
-            padding: 60px 40px;
+            padding: 50px 40px;
             text-align: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+            color: #f5f5dc;
+        }
+        
+        .hero-icon {
+            font-size: 3em;
+            color: #d4af37;
+            margin-bottom: 15px;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
         
         .hero h1 {
-            font-size: 3em;
-            margin-bottom: 20px;
-            animation: fadeInDown 0.8s;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #d4af37;
         }
         
         .hero p {
-            font-size: 1.3em;
+            font-size: 1.1em;
             opacity: 0.9;
-            animation: fadeInUp 0.8s;
+            color: #f5f5dc;
         }
         
         .features {
-            padding: 50px 40px;
+            padding: 50px 30px;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 30px;
@@ -58,185 +72,156 @@
         
         .feature {
             text-align: center;
-            padding: 20px;
+            padding: 30px 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .feature:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.2);
+            border-color: #d4af37;
         }
         
         .feature-icon {
-            font-size: 3em;
+            font-size: 2.5em;
             margin-bottom: 15px;
+            color: #2c2c2c;
         }
         
         .feature h3 {
-            color: #667eea;
+            color: #2c2c2c;
             margin-bottom: 10px;
-            font-size: 1.4em;
+            font-size: 1.3em;
         }
         
         .feature p {
             color: #666;
             line-height: 1.6;
+            font-size: 0.95em;
         }
         
         .cta-section {
-            padding: 50px 40px;
-            background: #f8f9fa;
+            padding: 50px 30px;
             text-align: center;
+        }
+        
+        .cta-section h2 {
+            color: #2c2c2c;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+        
+        .cta-section p {
+            color: #666;
+            font-size: 1em;
+            margin-bottom: 30px;
         }
         
         .cta-buttons {
             display: flex;
             gap: 20px;
             justify-content: center;
-            margin-top: 30px;
         }
         
         .btn {
-            padding: 15px 40px;
+            padding: 12px 35px;
             border: none;
-            border-radius: 50px;
-            font-size: 18px;
+            border-radius: 25px;
+            font-size: 1em;
             font-weight: 600;
             cursor: pointer;
             text-decoration: none;
-            display: inline-block;
-            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
         }
         
         .btn-primary {
-            background: #667eea;
-            color: white;
+            background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+            color: #d4af37;
+            border: 2px solid #d4af37;
         }
         
         .btn-primary:hover {
-            background: #5568d3;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3);
         }
         
         .btn-secondary {
-            background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
+            background: linear-gradient(135deg, #d4af37 0%, #daa520 100%);
+            color: #1a1a1a;
+            border: 2px solid #1a1a1a;
         }
         
         .btn-secondary:hover {
-            background: #667eea;
-            color: white;
-            transform: translateY(-2px);
-        }
-        
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(26, 26, 26, 0.2);
         }
         
         @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-            
-            .hero {
-                padding: 40px 20px;
-            }
-            
-            .hero h1 {
-                font-size: 2em;
-            }
-            
-            .hero p {
-                font-size: 1.1em;
-            }
-            
-            .features {
-                grid-template-columns: 1fr;
-                padding: 30px 20px;
-            }
-            
-            .cta-section {
-                padding: 30px 20px;
-            }
-            
-            .cta-buttons {
-                flex-direction: column;
-                width: 100%;
-            }
-            
-            .btn {
-                width: 100%;
-                padding: 15px 20px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .hero h1 {
-                font-size: 1.8em;
-            }
-            
-            .hero p {
-                font-size: 1em;
-            }
-            
-            .feature h3 {
-                font-size: 1.2em;
-            }
-            
-            .feature p {
-                font-size: 0.9em;
-            }
+            body { padding: 15px; }
+            .hero { padding: 40px 25px; }
+            .hero h1 { font-size: 2em; }
+            .hero-icon { font-size: 2.5em; }
+            .features { grid-template-columns: 1fr; padding: 40px 20px; }
+            .cta-section { padding: 40px 20px; }
+            .cta-buttons { flex-direction: column; }
+            .btn { width: 100%; justify-content: center; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="hero">
-            <h1>📝 TaskFlow</h1>
-            <p>Your Personal Daily Task Manager</p>
+            <div class="hero-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h1>✨ TaskFlow</h1>
+            <p>Your friendly daily task companion</p>
         </div>
         
         <div class="features">
             <div class="feature">
-                <div class="feature-icon">🎯</div>
-                <h3>Stay Organized</h3>
-                <p>Keep track of all your daily tasks in one beautiful, intuitive interface.</p>
+                <div class="feature-icon">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <h3>Easy & Simple</h3>
+                <p>Manage your tasks with a clean, intuitive interface designed for you.</p>
             </div>
             
             <div class="feature">
-                <div class="feature-icon">📊</div>
+                <div class="feature-icon">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
                 <h3>Track Progress</h3>
-                <p>Monitor your productivity with real-time statistics and completion rates.</p>
+                <p>See your productivity at a glance with beautiful statistics.</p>
             </div>
             
             <div class="feature">
-                <div class="feature-icon">🔒</div>
-                <h3>Secure & Private</h3>
-                <p>Your tasks are personal. Each user has their own secure, private workspace.</p>
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3>Safe & Secure</h3>
+                <p>Your tasks are private and protected, just for you.</p>
             </div>
         </div>
         
         <div class="cta-section">
-            <h2 style="color: #333; margin-bottom: 10px;">Ready to boost your productivity?</h2>
-            <p style="color: #666; font-size: 1.1em;">Join TaskFlow today and never miss a task again!</p>
+            <h2>Ready to get organized?</h2>
+            <p>Join TaskFlow and never miss a task again!</p>
             
             <div class="cta-buttons">
-                <a href="/register" class="btn btn-primary">Get Started Free</a>
-                <a href="/login" class="btn btn-secondary">Sign In</a>
+                <a href="/register" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> Get Started
+                </a>
+                <a href="/login" class="btn btn-secondary">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </a>
             </div>
         </div>
     </div>
