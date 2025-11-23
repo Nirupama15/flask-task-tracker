@@ -50,13 +50,14 @@ def init_db():
                   password TEXT NOT NULL,
                   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
     
-    # Tasks table with user_id
+    # Tasks table with user_id and due_date
     c.execute('''CREATE TABLE IF NOT EXISTS tasks
                  (id INTEGER PRIMARY KEY AUTOINCREMENT,
                   user_id INTEGER NOT NULL,
                   task TEXT NOT NULL,
                   completed INTEGER DEFAULT 0,
                   priority TEXT DEFAULT 'medium',
+                  due_date DATE NOT NULL,
                   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                   FOREIGN KEY (user_id) REFERENCES users (id))''')
     
@@ -66,12 +67,18 @@ def init_db():
 # Initialize database
 with app.app_context():
     init_db()
+# Add Jinja2 filter for date comparison
+@app.template_filter('as_date')
+def as_date_filter(date_string):
+    if isinstance(date_string, str):
+        return datetime.strptime(date_string, '%Y-%m-%d').date()
+    return date_string
 
 # Get tasks for current user
 def get_user_tasks(user_id):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute('SELECT * FROM tasks WHERE user_id = ? ORDER BY created_at DESC', (user_id,))
+    c.execute('SELECT * FROM tasks WHERE user_id = ? ORDER BY due_date ASC, created_at DESC', (user_id,))
     tasks = c.fetchall()
     conn.close()
     return tasks
@@ -82,7 +89,17 @@ def get_today_tasks(user_id):
     c = conn.cursor()
     today = date.today().strftime('%Y-%m-%d')
     c.execute('''SELECT * FROM tasks WHERE user_id = ? 
-                 AND DATE(created_at) = ? ORDER BY created_at DESC''', (user_id, today))
+                 AND due_date = ? ORDER BY created_at DESC''', (user_id, today))
+    tasks = c.fetchall()
+    conn.close()
+    return tasks
+
+# Get tasks by specific date
+def get_tasks_by_date(user_id, target_date):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('''SELECT * FROM tasks WHERE user_id = ? 
+                 AND due_date = ? ORDER BY created_at DESC''', (user_id, target_date))
     tasks = c.fetchall()
     conn.close()
     return tasks
@@ -171,8 +188,25 @@ def login():
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    # Get filter date from query parameter
+    filter_date = request.args.get('date')
+    
     all_tasks = get_user_tasks(current_user.id)
     today_tasks = get_today_tasks(current_user.id)
+    
+    # If filtering by date
+    if filter_date:
+        try:
+            # Validate date format
+            datetime.strptime(filter_date, '%Y-%m-%d')
+            filtered_tasks = get_tasks_by_date(current_user.id, filter_date)
+            filter_date_obj = datetime.strptime(filter_date, '%Y-%m-%d').date()
+        except ValueError:
+            flash('Invalid date format!', 'error')
+            return redirect(url_for('dashboard'))
+    else:
+        filtered_tasks = None
+        filter_date_obj = None
     
     # Calculate stats
     total_tasks = len(all_tasks)
@@ -181,14 +215,21 @@ def dashboard():
     today_total = len(today_tasks)
     today_completed = len([t for t in today_tasks if t[3] == 1])
     
+    # Get today's date for calendar default
+    today = date.today().strftime('%Y-%m-%d')
+    
     return render_template('dashboard.html', 
                          tasks=all_tasks,
                          today_tasks=today_tasks,
+                         filtered_tasks=filtered_tasks,
+                         filter_date=filter_date,
+                         filter_date_obj=filter_date_obj,
                          total=total_tasks,
                          completed=completed_tasks,
                          pending=pending_tasks,
                          today_total=today_total,
                          today_completed=today_completed,
+                         today=today,
                          user=current_user)
 
 @app.route('/add', methods=['POST'])
@@ -196,16 +237,29 @@ def dashboard():
 def add_task():
     task = request.form.get('task')
     priority = request.form.get('priority', 'medium')
+    due_date = request.form.get('due_date')
     
-    if task:
-        conn = sqlite3.connect(DB_PATH)
-        c = conn.cursor()
-        c.execute('INSERT INTO tasks (user_id, task, priority) VALUES (?, ?, ?)',
-                 (current_user.id, task, priority))
-        conn.commit()
-        conn.close()
-        flash('Task added successfully!', 'success')
+    if not task or not due_date:
+        flash('Task and date are required!', 'error')
+        return redirect(url_for('dashboard'))
     
+    # Validate date is not in the past
+    try:
+        due_date_obj = datetime.strptime(due_date, '%Y-%m-%d').date()
+        if due_date_obj < date.today():
+            flash('Cannot add tasks for past dates!', 'error')
+            return redirect(url_for('dashboard'))
+    except ValueError:
+        flash('Invalid date format!', 'error')
+        return redirect(url_for('dashboard'))
+    
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('INSERT INTO tasks (user_id, task, priority, due_date) VALUES (?, ?, ?, ?)',
+             (current_user.id, task, priority, due_date))
+    conn.commit()
+    conn.close()
+    flash('Task added successfully!', 'success')
     return redirect(url_for('dashboard'))
 
 @app.route('/complete/<int:task_id>')
@@ -213,9 +267,23 @@ def add_task():
 def complete_task(task_id):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute('UPDATE tasks SET completed = 1 WHERE id = ? AND user_id = ?', 
-             (task_id, current_user.id))
-    conn.commit()
+    
+    # Check if task belongs to user and if due_date is not in future
+    c.execute('SELECT due_date FROM tasks WHERE id = ? AND user_id = ?', (task_id, current_user.id))
+    task_data = c.fetchone()
+    
+    if task_data:
+        task_due_date = datetime.strptime(task_data[0], '%Y-%m-%d').date()
+        if task_due_date > date.today():
+            flash('Cannot complete future tasks!', 'error')
+            conn.close()
+            return redirect(url_for('dashboard'))
+        
+        c.execute('UPDATE tasks SET completed = 1 WHERE id = ? AND user_id = ?', 
+                 (task_id, current_user.id))
+        conn.commit()
+        flash('Task marked as complete!', 'success')
+    
     conn.close()
     return redirect(url_for('dashboard'))
 
@@ -228,6 +296,7 @@ def uncomplete_task(task_id):
              (task_id, current_user.id))
     conn.commit()
     conn.close()
+    flash('Task marked as incomplete!', 'success')
     return redirect(url_for('dashboard'))
 
 @app.route('/delete/<int:task_id>')
@@ -247,16 +316,29 @@ def delete_task(task_id):
 def edit_task(task_id):
     new_task = request.form.get('task')
     priority = request.form.get('priority', 'medium')
+    due_date = request.form.get('due_date')
     
-    if new_task:
-        conn = sqlite3.connect(DB_PATH)
-        c = conn.cursor()
-        c.execute('UPDATE tasks SET task = ?, priority = ? WHERE id = ? AND user_id = ?',
-                 (new_task, priority, task_id, current_user.id))
-        conn.commit()
-        conn.close()
-        flash('Task updated successfully!', 'success')
+    if not new_task or not due_date:
+        flash('Task and date are required!', 'error')
+        return redirect(url_for('dashboard'))
     
+    # Validate date
+    try:
+        due_date_obj = datetime.strptime(due_date, '%Y-%m-%d').date()
+        if due_date_obj < date.today():
+            flash('Cannot set past dates!', 'error')
+            return redirect(url_for('dashboard'))
+    except ValueError:
+        flash('Invalid date format!', 'error')
+        return redirect(url_for('dashboard'))
+    
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('UPDATE tasks SET task = ?, priority = ?, due_date = ? WHERE id = ? AND user_id = ?',
+             (new_task, priority, due_date, task_id, current_user.id))
+    conn.commit()
+    conn.close()
+    flash('Task updated successfully!', 'success')
     return redirect(url_for('dashboard'))
 
 @app.route('/logout')
