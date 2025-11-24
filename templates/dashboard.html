@@ -257,8 +257,10 @@
         }
         
         .task-item.priority-medium {
-            border-left-color: #d4af37;
+    border-left-color: #d4af37;
+    background: linear-gradient(135deg, #fffbea 0%, #fff8dc 100%);
         }
+        
         
         .task-item.priority-low {
             border-left-color: #2196f3;
@@ -412,6 +414,24 @@
             font-size: 1.5em;
             border-bottom: 3px solid #d4af37;
             padding-bottom: 10px;
+        }
+        
+        .date-filter {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border: 2px solid #d4af37;
+        }
+        
+        .filtered-section {
+            background: linear-gradient(135deg, #e8f4f8 0%, #d1e7f0 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border-left: 5px solid #2196f3;
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.15);
         }
         
         /* Cute Delete Modal */
@@ -602,6 +622,65 @@
         </div>
         {% endif %}
         
+        <!-- Date Filter Section -->
+        <div class="date-filter">
+            <form method="GET" action="/dashboard" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <label for="filter-date" style="font-weight: 600; color: #2c2c2c;">
+                    <i class="fas fa-calendar-alt"></i> View tasks for:
+                </label>
+                <input type="date" id="filter-date" name="date" value="{{ filter_date or today }}" 
+                       style="padding: 10px; border: 2px solid #d4af37; border-radius: 10px; font-size: 0.95em;">
+                <button type="submit" class="btn btn-primary" style="padding: 10px 20px;">
+                    <i class="fas fa-search"></i> Show Tasks
+                </button>
+                {% if filter_date %}
+                <a href="/dashboard" class="btn btn-primary" style="padding: 10px 20px; text-decoration: none;">
+                    <i class="fas fa-times"></i> Clear Filter
+                </a>
+                {% endif %}
+            </form>
+        </div>
+        
+        {% if filtered_tasks is not none %}
+        <div class="filtered-section">
+            <h3 style="color: #2c2c2c; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-calendar-day" style="color: #d4af37;"></i>
+                Tasks for {{ filter_date_obj.strftime('%B %d, %Y') }}
+                ({{ filtered_tasks|length }} task{% if filtered_tasks|length != 1 %}s{% endif %})
+            </h3>
+            {% if filtered_tasks %}
+            <ul class="task-list">
+                {% for task in filtered_tasks %}
+                <li class="task-item {% if task[3] == 1 %}completed{% endif %} priority-{{ task[4] }}">
+                    <span class="priority-badge priority-{{ task[4] }}">{{ task[4] }}</span>
+                    <span class="task-text">{{ task[2] }}</span>
+                    <div class="task-actions">
+                        {% if task[3] == 0 and filter_date_obj <= today|as_date %}
+                        <a href="/complete/{{ task[0] }}" class="btn-small btn-complete">
+                            <i class="fas fa-check"></i> Done
+                        </a>
+                        {% elif task[3] == 0 %}
+                        <span class="btn-small" style="background: #ccc; color: #666; cursor: not-allowed;">
+                            <i class="fas fa-lock"></i> Future
+                        </span>
+                        {% else %}
+                        <a href="/uncomplete/{{ task[0] }}" class="btn-small btn-uncomplete">
+                            <i class="fas fa-undo"></i> Undo
+                        </a>
+                        {% endif %}
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="no-tasks">
+                <i class="fas fa-calendar-check"></i>
+                <p>No tasks scheduled for this date!</p>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
         <form action="/add" method="POST" class="add-task-form">
             <input type="text" name="task" placeholder="What do you need to do?" required>
             <select name="priority">
@@ -609,6 +688,8 @@
                 <option value="medium" selected>Medium Priority</option>
                 <option value="high">High Priority</option>
             </select>
+            <input type="date" name="due_date" value="{{ today }}" required min="{{ today }}"
+                   style="padding: 12px 15px; border: 2px solid #d4af37; border-radius: 10px; font-size: 0.95em;">
             <button type="submit" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Add Task
             </button>
@@ -630,6 +711,8 @@
                         <option value="medium" {% if task[4] == 'medium' %}selected{% endif %}>Medium</option>
                         <option value="high" {% if task[4] == 'high' %}selected{% endif %}>High</option>
                     </select>
+                    <input type="date" name="due_date" value="{{ task[5] }}" required min="{{ today }}"
+                           style="padding: 10px; border: 2px solid #d4af37; border-radius: 8px; font-size: 0.95em;">
                     <button type="submit" class="btn-small btn-complete">
                         <i class="fas fa-save"></i> Save
                     </button>
@@ -639,11 +722,17 @@
                 </form>
                 
                 <div class="task-actions" id="actions-{{ task[0] }}">
-                    {% if task[3] == 0 %}
+                    {% set task_date = task[5]|as_date %}
+                    {% if task[3] == 0 and task_date <= today|as_date %}
                     <a href="/complete/{{ task[0] }}" class="btn-small btn-complete">
                         <i class="fas fa-check"></i> Done
                     </a>
-                    {% else %}
+                    {% elif task[3] == 0 and task_date > today|as_date %}
+                    <span class="btn-small" style="background: #ccc; color: #666; cursor: not-allowed;" 
+                          title="Cannot complete future tasks">
+                        <i class="fas fa-lock"></i> Future
+                    </span>
+                    {% elif task[3] == 1 %}
                     <a href="/uncomplete/{{ task[0] }}" class="btn-small btn-uncomplete">
                         <i class="fas fa-undo"></i> Undo
                     </a>
@@ -656,6 +745,10 @@
                     <button class="btn-small btn-delete" onclick="showDeleteModal({{ task[0] }})">
                         <i class="fas fa-trash"></i> Delete
                     </button>
+                    
+                    <span class="task-date" style="font-size: 0.85em; color: #666; padding: 5px 10px; background: #f0f0f0; border-radius: 8px;">
+                        <i class="fas fa-calendar"></i> {{ task[5] }}
+                    </span>
                 </div>
             </li>
             {% endfor %}
@@ -688,6 +781,12 @@
     </div>
     
     <script>
+        // Add date filter helper
+        function parseDate(dateStr) {
+            if (!dateStr) return new Date();
+            return new Date(dateStr);
+        }
+        
         let taskToDelete = null;
         
         function editTask(taskId) {
